@@ -1,10 +1,13 @@
 package com.web.dev.painelOnline.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "itens_nota")
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 public class ItemNota {
 
     @Id
@@ -23,9 +26,13 @@ public class ItemNota {
     @Column(name = "valor_total", nullable = false, precision = 15, scale = 2)
     private BigDecimal valorTotal;
 
+    // Permite que o campo seja **lido do JSON de entrada** (WRITE), mas evita que
+    // seja automaticamente serializado na resposta (READ),
+    // ao mesmo tempo não impede o uso JPA.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transacao_id", nullable = false)
-    private Transacao transacao;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private com.web.dev.painelOnline.entities.Transacao transacao;
 
     @PrePersist
     @PreUpdate
@@ -38,7 +45,7 @@ public class ItemNota {
     // Constructors
     public ItemNota() {}
 
-    public ItemNota(String descricao, Integer quantidade, BigDecimal valorUnitario, Transacao transacao) {
+    public ItemNota(String descricao, Integer quantidade, BigDecimal valorUnitario, com.web.dev.painelOnline.entities.Transacao transacao) {
         this.descricao = descricao;
         this.quantidade = quantidade;
         this.valorUnitario = valorUnitario;
@@ -61,6 +68,18 @@ public class ItemNota {
     public BigDecimal getValorTotal() { return valorTotal; }
     public void setValorTotal(BigDecimal valorTotal) { this.valorTotal = valorTotal; }
 
-    public Transacao getTransacao() { return transacao; }
-    public void setTransacao(Transacao transacao) { this.transacao = transacao; }
+    public com.web.dev.painelOnline.entities.Transacao getTransacao() { return transacao; }
+    public void setTransacao(com.web.dev.painelOnline.entities.Transacao transacao) { this.transacao = transacao; }
+
+    @Override
+    public String toString() {
+        return "ItemNota{" +
+                "descricao='" + descricao + '\'' +
+                ", id=" + id +
+                ", quantidade=" + quantidade +
+                ", valorUnitario=" + valorUnitario +
+                ", valorTotal=" + valorTotal +
+                ", transacao=" + (transacao != null ? "Transacao[id=" + transacao.getId() + "]" : "null") +
+                '}';
+    }
 }

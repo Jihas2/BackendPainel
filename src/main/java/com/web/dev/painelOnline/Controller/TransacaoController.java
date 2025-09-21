@@ -4,9 +4,11 @@ import com.web.dev.painelOnline.entities.Transacao;
 import com.web.dev.painelOnline.entities.ItemNota;
 import com.web.dev.painelOnline.services.TransacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +37,19 @@ public class TransacaoController {
     @PostMapping("/com-itens")
     public ResponseEntity<Transacao> criarTransacaoComItens(@RequestBody Map<String, Object> request) {
         try {
-            Transacao transacao = (Transacao) request.get("transacao");
+            // espera: request contém "transacao": {..} e "itens": [ {...}, ... ]
+            // conversões simples - aqui assumimos incoming JSON compatível com entidades
+            Object transacaoObj = request.get("transacao");
+            Object itensObj = request.get("itens");
+
+            // Para manter simples e sem DTO, delegamos responsabilidade de casting ao Jackson autorresponsável do Spring.
+            // Uma alternativa robusta é receber um DTO; aqui fazemos um cast seguro via Map -> Re-serialização automática seria melhor,
+            // mas para manter sem DTOs, o cliente deve enviar o JSON exatamente como a entidade Transacao e ItemNota.
+
+            // (Aqui assumimos que a deserialização já ocorreu; para segurança, o ideal é criar DTOs.)
+            Transacao transacao = (Transacao) transacaoObj;
             @SuppressWarnings("unchecked")
-            List<ItemNota> itens = (List<ItemNota>) request.get("itens");
+            List<ItemNota> itens = (List<ItemNota>) itensObj;
 
             Transacao novaTransacao = transacaoService.criarTransacaoComItens(transacao, itens);
             return ResponseEntity.status(HttpStatus.CREATED).body(novaTransacao);
@@ -79,8 +91,8 @@ public class TransacaoController {
     // Buscar transações por período
     @GetMapping("/periodo")
     public ResponseEntity<List<Transacao>> buscarTransacoesPorPeriodo(
-            @RequestParam LocalDate dataInicio,
-            @RequestParam LocalDate dataFim) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim) {
         List<Transacao> transacoes = transacaoService.buscarTransacoesPorPeriodo(dataInicio, dataFim);
         return ResponseEntity.ok(transacoes);
     }

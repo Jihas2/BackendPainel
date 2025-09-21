@@ -6,6 +6,7 @@ import com.web.dev.painelOnline.repository.TransacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -35,44 +36,42 @@ public class ExtratoFinanceiroService {
         extrato.setTotalCreditosDolares(totalCreditos);
         extrato.setTotalDebitosDolares(totalDebitos);
 
+        // Calcular saldo do dia explicitamente
+        BigDecimal saldoDia = totalCreditos.subtract(totalDebitos);
+        extrato.setSaldoDiaDolares(saldoDia);
+
         // Calcular e definir saldo acumulado
         BigDecimal saldoAcumuladoAnterior = calcularSaldoAcumuladoAteData(data.minusDays(1));
-        extrato.setSaldoAcumuladoDolares(saldoAcumuladoAnterior.add(extrato.getSaldoDiaDolares()));
+        extrato.setSaldoAcumuladoDolares(saldoAcumuladoAnterior.add(saldoDia));
 
         return extratoFinanceiroRepository.save(extrato);
     }
 
-    // Calcular saldo acumulado até uma data
     @Transactional(readOnly = true)
     public BigDecimal calcularSaldoAcumuladoAteData(LocalDate data) {
         return extratoFinanceiroRepository.calcularSaldoAcumuladoAteData(data);
     }
 
-    // Buscar extrato por data
     @Transactional(readOnly = true)
     public Optional<ExtratoFinanceiro> buscarExtratoPorData(LocalDate data) {
         return extratoFinanceiroRepository.findByData(data);
     }
 
-    // Buscar extratos por período
     @Transactional(readOnly = true)
     public List<ExtratoFinanceiro> buscarExtratosPorPeriodo(LocalDate dataInicio, LocalDate dataFim) {
         return extratoFinanceiroRepository.findByDataBetween(dataInicio, dataFim);
     }
 
-    // Buscar extratos do mês
     @Transactional(readOnly = true)
     public List<ExtratoFinanceiro> buscarExtratosMes(int ano, int mes) {
         return extratoFinanceiroRepository.findExtratosPorMes(ano, mes);
     }
 
-    // Buscar extratos do ano
     @Transactional(readOnly = true)
     public List<ExtratoFinanceiro> buscarExtratosAno(int ano) {
         return extratoFinanceiroRepository.findExtratosPorAno(ano);
     }
 
-    // Calcular totais mensais
     @Transactional(readOnly = true)
     public BigDecimal calcularTotalCreditosMes(int ano, int mes) {
         return extratoFinanceiroRepository.calcularTotalCreditosMes(ano, mes);
@@ -88,7 +87,6 @@ public class ExtratoFinanceiroService {
         return extratoFinanceiroRepository.calcularSaldoMes(ano, mes);
     }
 
-    // Calcular totais anuais
     @Transactional(readOnly = true)
     public BigDecimal calcularTotalCreditosAno(int ano) {
         return extratoFinanceiroRepository.calcularTotalCreditosAno(ano);

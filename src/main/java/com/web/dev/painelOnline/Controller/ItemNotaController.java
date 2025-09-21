@@ -1,12 +1,13 @@
 package com.web.dev.painelOnline.Controller;
 
 import com.web.dev.painelOnline.entities.ItemNota;
-import com.web.dev.painelOnline.repository.ItemNotaRepository;
+import com.web.dev.painelOnline.services.ItemNotaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/itens-nota")
@@ -14,59 +15,85 @@ import java.util.Optional;
 public class ItemNotaController {
 
     @Autowired
-    private ItemNotaRepository itemNotaRepository;
+    private ItemNotaService itemNotaService;
 
-    // Buscar todos os itens de uma transação
     @GetMapping("/transacao/{transacaoId}")
     public ResponseEntity<List<ItemNota>> buscarItensPorTransacao(@PathVariable Long transacaoId) {
-        List<ItemNota> itens = itemNotaRepository.findByTransacaoId(transacaoId);
+        List<ItemNota> itens = itemNotaService.buscarItensPorTransacao(transacaoId);
         return ResponseEntity.ok(itens);
     }
 
-    // Buscar item por ID
     @GetMapping("/{id}")
-    public ResponseEntity<ItemNota> buscarItemPorId(@PathVariable Long id) {
-        Optional<ItemNota> item = itemNotaRepository.findById(id);
-        return item.map(ResponseEntity::ok)
+    public ResponseEntity<?> buscarItemPorId(@PathVariable Long id) {
+        return itemNotaService.buscarItemPorId(id)
+                .map(item -> {
+                    Map<String,Object> resp = new LinkedHashMap<>();
+                    resp.put("id", item.getId());
+                    resp.put("descricao", item.getDescricao());
+                    resp.put("quantidade", item.getQuantidade());
+                    resp.put("valorUnitario", item.getValorUnitario());
+                    resp.put("valorTotal", item.getValorTotal());
+                    resp.put("transacaoId", item.getTransacao() != null ? item.getTransacao().getId() : null);
+                    return ResponseEntity.ok(resp);
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Criar novo item
     @PostMapping
-    public ResponseEntity<ItemNota> criarItem(@RequestBody ItemNota item) {
+    public ResponseEntity<?> criarItem(@RequestBody ItemNota item) {
         try {
-            ItemNota novoItem = itemNotaRepository.save(item);
-            return ResponseEntity.ok(novoItem);
+            ItemNota salvo = itemNotaService.criarItem(item);
+            Map<String,Object> resp = new LinkedHashMap<>();
+            resp.put("id", salvo.getId());
+            resp.put("descricao", salvo.getDescricao());
+            resp.put("quantidade", salvo.getQuantidade());
+            resp.put("valorUnitario", salvo.getValorUnitario());
+            resp.put("valorTotal", salvo.getValorTotal());
+            resp.put("transacaoId", salvo.getTransacao() != null ? salvo.getTransacao().getId() : null);
+            return ResponseEntity.status(HttpStatus.CREATED).body(resp);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao criar ItemNota: " + e.getMessage());
         }
     }
 
-    // Atualizar item
     @PutMapping("/{id}")
-    public ResponseEntity<ItemNota> atualizarItem(@PathVariable Long id, @RequestBody ItemNota item) {
-        if (itemNotaRepository.existsById(id)) {
-            item.setId(id);
-            ItemNota itemAtualizado = itemNotaRepository.save(item);
-            return ResponseEntity.ok(itemAtualizado);
+    public ResponseEntity<?> atualizarItem(@PathVariable Long id, @RequestBody ItemNota item) {
+        try {
+            ItemNota atualizado = itemNotaService.atualizarItem(id, item);
+            Map<String,Object> resp = new LinkedHashMap<>();
+            resp.put("id", atualizado.getId());
+            resp.put("descricao", atualizado.getDescricao());
+            resp.put("quantidade", atualizado.getQuantidade());
+            resp.put("valorUnitario", atualizado.getValorUnitario());
+            resp.put("valorTotal", atualizado.getValorTotal());
+            resp.put("transacaoId", atualizado.getTransacao() != null ? atualizado.getTransacao().getId() : null);
+            return ResponseEntity.ok(resp);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao atualizar ItemNota: " + e.getMessage());
         }
-        return ResponseEntity.notFound().build();
     }
 
-    // Excluir item
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluirItem(@PathVariable Long id) {
-        if (itemNotaRepository.existsById(id)) {
-            itemNotaRepository.deleteById(id);
+        try {
+            itemNotaService.excluirItem(id);
             return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
     }
 
-    // Buscar itens por descrição
     @GetMapping("/buscar")
     public ResponseEntity<List<ItemNota>> buscarItensPorDescricao(@RequestParam String descricao) {
-        List<ItemNota> itens = itemNotaRepository.findByDescricaoContaining(descricao);
+        List<ItemNota> itens = itemNotaService.buscarPorDescricao(descricao);
         return ResponseEntity.ok(itens);
     }
 }

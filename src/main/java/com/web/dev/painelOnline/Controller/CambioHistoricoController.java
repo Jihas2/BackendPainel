@@ -3,6 +3,7 @@ package com.web.dev.painelOnline.Controller;
 import com.web.dev.painelOnline.entities.CambioHistorico;
 import com.web.dev.painelOnline.services.CambioHistoricoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +36,8 @@ public class CambioHistoricoController {
 
     // Buscar taxa por data específica
     @GetMapping("/data/{data}")
-    public ResponseEntity<CambioHistorico> buscarTaxaPorData(@PathVariable LocalDate data) {
+    public ResponseEntity<CambioHistorico> buscarTaxaPorData(
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
         Optional<CambioHistorico> cambio = cambioHistoricoService.buscarTaxaPorData(data);
         return cambio.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -51,7 +53,8 @@ public class CambioHistoricoController {
 
     // Buscar taxa mais recente até uma data específica
     @GetMapping("/ate-data/{data}")
-    public ResponseEntity<CambioHistorico> buscarTaxaMaisRecenteAteData(@PathVariable LocalDate data) {
+    public ResponseEntity<CambioHistorico> buscarTaxaMaisRecenteAteData(
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
         Optional<CambioHistorico> cambio = cambioHistoricoService.buscarTaxaMaisRecenteAteData(data);
         return cambio.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -60,8 +63,8 @@ public class CambioHistoricoController {
     // Buscar taxas por período
     @GetMapping("/periodo")
     public ResponseEntity<List<CambioHistorico>> buscarTaxasPorPeriodo(
-            @RequestParam LocalDate dataInicio,
-            @RequestParam LocalDate dataFim) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim) {
         List<CambioHistorico> taxas = cambioHistoricoService.buscarTaxasPorPeriodo(dataInicio, dataFim);
         return ResponseEntity.ok(taxas);
     }

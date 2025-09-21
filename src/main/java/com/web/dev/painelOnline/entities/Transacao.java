@@ -5,6 +5,7 @@ import com.web.dev.painelOnline.Enum.StatusPagamento;
 import com.web.dev.painelOnline.Enum.TipoPagamento;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,9 +58,9 @@ public class Transacao {
     protected void onCreate() {
         this.dataCriacao = LocalDateTime.now();
         this.dataAtualizacao = LocalDateTime.now();
-        // Calcula valor em dólares
+        // Calcula valor em dólares de forma segura
         if (this.valorReais != null && this.taxaCambio != null) {
-            this.valorDolares = this.valorReais.divide(this.taxaCambio, 2, BigDecimal.ROUND_HALF_UP);
+            this.valorDolares = this.valorReais.divide(this.taxaCambio, 2, RoundingMode.HALF_UP);
         }
     }
 
@@ -68,7 +69,7 @@ public class Transacao {
         this.dataAtualizacao = LocalDateTime.now();
         // Recalcula valor em dólares
         if (this.valorReais != null && this.taxaCambio != null) {
-            this.valorDolares = this.valorReais.divide(this.taxaCambio, 2, BigDecimal.ROUND_HALF_UP);
+            this.valorDolares = this.valorReais.divide(this.taxaCambio, 2, RoundingMode.HALF_UP);
         }
     }
 
@@ -123,4 +124,22 @@ public class Transacao {
 
     public List<ItemNota> getItens() { return itens; }
     public void setItens(List<ItemNota> itens) { this.itens = itens; }
+
+    @Override
+    public String toString() {
+        return "Transacao{" +
+                "caracteristica='" + caracteristica + '\'' +
+                ", id=" + id +
+                ", data=" + data +
+                ", valorReais=" + valorReais +
+                ", taxaCambio=" + taxaCambio +
+                ", valorDolares=" + valorDolares +
+                ", tipoTransacao=" + tipoTransacao +
+                ", statusPagamento=" + statusPagamento +
+                ", tipoPagamento=" + tipoPagamento +
+                ", dataCriacao=" + dataCriacao +
+                ", dataAtualizacao=" + dataAtualizacao +
+                ", itens=" + itens +
+                '}';
+    }
 }
