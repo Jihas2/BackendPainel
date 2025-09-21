@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,9 @@ public class ItemNotaService {
 
     @Autowired
     private TransacaoRepository transacaoRepository;
+
+    @Autowired
+    private ExtratoFinanceiroService extratoFinanceiroService;
 
     // Cria item validando os dados e associando a transacao gerenciada
     public ItemNota criarItem(ItemNota item) {
@@ -36,12 +40,19 @@ public class ItemNotaService {
         }
 
         // associar entidade gerenciada
-        item.setTransacao(transacaoOpt.get());
+        Transacao transacao = transacaoOpt.get();
+        item.setTransacao(transacao);
 
         // garantir valorTotal calculado
         item.setValorTotal(calcularValorTotalItem(item));
 
-        return itemNotaRepository.save(item);
+        ItemNota salvo = itemNotaRepository.save(item);
+
+        // Atualiza extrato do dia da transacao (assegura que dashboard reflita imediatamente)
+        LocalDate dataTransacao = transacao.getData();
+        extratoFinanceiroService.atualizarExtratoDia(dataTransacao);
+
+        return salvo;
     }
 
     public ItemNota atualizarItem(Long id, ItemNota item) {
@@ -51,6 +62,10 @@ public class ItemNotaService {
         }
 
         ItemNota existente = existingOpt.get();
+        LocalDate dataTransacaoAnterior = null;
+        if (existente.getTransacao() != null) {
+            dataTransacaoAnterior = existente.getTransacao().getData();
+        }
 
         if (item.getDescricao() != null) existente.setDescricao(item.getDescricao());
         if (item.getQuantidade() != null) existente.setQuantidade(item.getQuantidade());
@@ -67,14 +82,36 @@ public class ItemNotaService {
         // recalcula valorTotal
         existente.setValorTotal(calcularValorTotalItem(existente));
 
-        return itemNotaRepository.save(existente);
+        ItemNota atualizado = itemNotaRepository.save(existente);
+
+        // Atualiza extrato(s): data anterior (se diferente) e data atual da transacao
+        LocalDate dataTransacaoAtual = atualizado.getTransacao() != null ? atualizado.getTransacao().getData() : null;
+
+        if (dataTransacaoAnterior != null) {
+            extratoFinanceiroService.atualizarExtratoDia(dataTransacaoAnterior);
+        }
+        if (dataTransacaoAtual != null && !dataTransacaoAtual.equals(dataTransacaoAnterior)) {
+            extratoFinanceiroService.atualizarExtratoDia(dataTransacaoAtual);
+        }
+
+        return atualizado;
     }
 
     public void excluirItem(Long id) {
-        if (!itemNotaRepository.existsById(id)) {
+        Optional<ItemNota> existingOpt = itemNotaRepository.findById(id);
+        if (!existingOpt.isPresent()) {
             throw new RuntimeException("ItemNota não encontrada com id: " + id);
         }
+
+        ItemNota existente = existingOpt.get();
+        LocalDate dataTransacao = existente.getTransacao() != null ? existente.getTransacao().getData() : null;
+
         itemNotaRepository.deleteById(id);
+
+        // Atualiza extrato do dia da transacao (para refletir remoção do item)
+        if (dataTransacao != null) {
+            extratoFinanceiroService.atualizarExtratoDia(dataTransacao);
+        }
     }
 
     @Transactional(readOnly = true)
