@@ -22,7 +22,7 @@ public class TransacaoController {
     @Autowired
     private TransacaoService transacaoService;
 
-    // Criar nova transação simples
+    // Cria uma nova transação
     @PostMapping
     public ResponseEntity<Transacao> criarTransacao(@RequestBody Transacao transacao) {
         try {
@@ -33,20 +33,14 @@ public class TransacaoController {
         }
     }
 
-    // Criar transação com itens (para débitos à prazo)
+    // Cria uma transação com itens para débitos à prazo
     @PostMapping("/com-itens")
     public ResponseEntity<Transacao> criarTransacaoComItens(@RequestBody Map<String, Object> request) {
         try {
-            // espera: request contém "transacao": {..} e "itens": [ {...}, ... ]
-            // conversões simples - aqui assumimos incoming JSON compatível com entidades
+
             Object transacaoObj = request.get("transacao");
             Object itensObj = request.get("itens");
 
-            // Para manter simples e sem DTO, delegamos responsabilidade de casting ao Jackson autorresponsável do Spring.
-            // Uma alternativa robusta é receber um DTO; aqui fazemos um cast seguro via Map -> Re-serialização automática seria melhor,
-            // mas para manter sem DTOs, o cliente deve enviar o JSON exatamente como a entidade Transacao e ItemNota.
-
-            // (Aqui assumimos que a deserialização já ocorreu; para segurança, o ideal é criar DTOs.)
             Transacao transacao = (Transacao) transacaoObj;
             @SuppressWarnings("unchecked")
             List<ItemNota> itens = (List<ItemNota>) itensObj;
@@ -58,14 +52,14 @@ public class TransacaoController {
         }
     }
 
-    // Buscar todas as transações
+    // Busca todas as transações
     @GetMapping
     public ResponseEntity<List<Transacao>> buscarTodasTransacoes() {
         List<Transacao> transacoes = transacaoService.buscarTodasTransacoes();
         return ResponseEntity.ok(transacoes);
     }
 
-    // Buscar transação por ID
+    // Busca a transação por ID
     @GetMapping("/{id}")
     public ResponseEntity<Transacao> buscarTransacaoPorId(@PathVariable Long id) {
         Optional<Transacao> transacao = transacaoService.buscarTransacaoPorId(id);
@@ -73,7 +67,7 @@ public class TransacaoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Buscar transação com itens
+    // Busca a transação com itens
     @GetMapping("/{id}/com-itens")
     public ResponseEntity<Transacao> buscarTransacaoComItens(@PathVariable Long id) {
         try {
@@ -88,7 +82,7 @@ public class TransacaoController {
         }
     }
 
-    // Buscar transações por período
+    // Busca as transações por período
     @GetMapping("/periodo")
     public ResponseEntity<List<Transacao>> buscarTransacoesPorPeriodo(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
@@ -97,7 +91,7 @@ public class TransacaoController {
         return ResponseEntity.ok(transacoes);
     }
 
-    // Buscar transações do mês
+    // Busca as transações do mes
     @GetMapping("/mes/{ano}/{mes}")
     public ResponseEntity<List<Transacao>> buscarTransacoesMes(
             @PathVariable int ano,
@@ -106,7 +100,7 @@ public class TransacaoController {
         return ResponseEntity.ok(transacoes);
     }
 
-    // Buscar débitos à prazo do mês
+    // Busca débitos à prazo do mes
     @GetMapping("/debitos-prazo/{ano}/{mes}")
     public ResponseEntity<List<Transacao>> buscarDebitosAPrazoMes(
             @PathVariable int ano,
@@ -115,7 +109,7 @@ public class TransacaoController {
         return ResponseEntity.ok(debitos);
     }
 
-    // Atualizar transação
+    // Atualiza a transação
     @PutMapping("/{id}")
     public ResponseEntity<Transacao> atualizarTransacao(
             @PathVariable Long id,
@@ -130,7 +124,7 @@ public class TransacaoController {
         }
     }
 
-    // Excluir transação
+    // Exclui a  transação
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluirTransacao(@PathVariable Long id) {
         try {

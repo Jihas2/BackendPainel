@@ -15,14 +15,14 @@ public class DashboardController {
     @Autowired
     private DashboardService dashboardService;
 
-    // Obter dados do dashboard do mês atual
+    // Dados do dashboard do mes atual
     @GetMapping
     public ResponseEntity<Map<String, Object>> obterDashboardAtual() {
         Map<String, Object> dashboard = dashboardService.obterDadosDashboard();
         return ResponseEntity.ok(dashboard);
     }
 
-    // Obter dados do dashboard de um mês específico
+    // Dados do dashboard de um mes específico
     @GetMapping("/mes/{ano}/{mes}")
     public ResponseEntity<Map<String, Object>> obterDashboardMes(
             @PathVariable int ano,
@@ -31,7 +31,7 @@ public class DashboardController {
         return ResponseEntity.ok(dashboard);
     }
 
-    // Obter dados do dashboard de um ano específico
+    // Dados do dashboard de um ano específico
     @GetMapping("/ano/{ano}")
     public ResponseEntity<Map<String, Object>> obterDashboardAno(@PathVariable int ano) {
         Map<String, Object> dashboard = dashboardService.obterDadosDashboardAno(ano);

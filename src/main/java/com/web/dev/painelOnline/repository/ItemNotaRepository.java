@@ -12,28 +12,28 @@ import java.util.List;
 @Repository
 public interface ItemNotaRepository extends JpaRepository<ItemNota, Long> {
 
-    // Buscar itens por transação
+    // Busca itens por transação
     List<ItemNota> findByTransacao(Transacao transacao);
 
-    // Buscar itens por ID da transação
+    // Busca itens por ID da transação
     List<ItemNota> findByTransacaoId(Long transacaoId);
 
-    // Buscar itens por descrição (busca parcial)
+    // Busca itens por descrição
     @Query("SELECT i FROM ItemNota i WHERE LOWER(i.descricao) LIKE LOWER(CONCAT('%', :descricao, '%'))")
     List<ItemNota> findByDescricaoContaining(@Param("descricao") String descricao);
 
-    // Calcular valor total dos itens de uma transação
+    // Calcula o valor total dos itens de uma transação
     @Query("SELECT COALESCE(SUM(i.valorTotal), 0) FROM ItemNota i WHERE i.transacao.id = :transacaoId")
     BigDecimal calcularValorTotalPorTransacao(@Param("transacaoId") Long transacaoId);
 
-    // Contar itens por transação
+    // Conta os itens por transação
     Long countByTransacaoId(Long transacaoId);
 
-    // Buscar itens com valor acima de um determinado valor
+    // Busca os itens com valor acima de um determinado valor
     @Query("SELECT i FROM ItemNota i WHERE i.valorUnitario >= :valorMinimo")
     List<ItemNota> findByValorUnitarioGreaterThanEqual(@Param("valorMinimo") BigDecimal valorMinimo);
 
-    // Buscar itens ordenados por valor total decrescente
+    // Busca itens ordenados por valor total decrescente
     @Query("SELECT i FROM ItemNota i WHERE i.transacao.id = :transacaoId ORDER BY i.valorTotal DESC")
     List<ItemNota> findByTransacaoIdOrderByValorTotalDesc(@Param("transacaoId") Long transacaoId);
 }

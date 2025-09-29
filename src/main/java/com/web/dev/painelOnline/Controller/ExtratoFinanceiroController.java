@@ -21,7 +21,7 @@ public class ExtratoFinanceiroController {
     @Autowired
     private ExtratoFinanceiroService extratoFinanceiroService;
 
-    // Buscar extrato por data específica
+    // Busca o extrato por data específica
     @GetMapping("/data/{data}")
     public ResponseEntity<ExtratoFinanceiro> buscarExtratoPorData(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
@@ -30,7 +30,7 @@ public class ExtratoFinanceiroController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Buscar extratos por período
+    // Busca os extratos por período
     @GetMapping("/periodo")
     public ResponseEntity<List<ExtratoFinanceiro>> buscarExtratosPorPeriodo(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
@@ -39,7 +39,7 @@ public class ExtratoFinanceiroController {
         return ResponseEntity.ok(extratos);
     }
 
-    // Buscar extratos do mês
+    // Busca os extratos do mes
     @GetMapping("/mes/{ano}/{mes}")
     public ResponseEntity<List<ExtratoFinanceiro>> buscarExtratosMes(
             @PathVariable int ano,
@@ -48,14 +48,14 @@ public class ExtratoFinanceiroController {
         return ResponseEntity.ok(extratos);
     }
 
-    // Buscar extratos do ano
+    // Busca os extratos do ano
     @GetMapping("/ano/{ano}")
     public ResponseEntity<List<ExtratoFinanceiro>> buscarExtratosAno(@PathVariable int ano) {
         List<ExtratoFinanceiro> extratos = extratoFinanceiroService.buscarExtratosAno(ano);
         return ResponseEntity.ok(extratos);
     }
 
-    // Obter resumo mensal
+    //  Resumo mensal
     @GetMapping("/resumo/mes/{ano}/{mes}")
     public ResponseEntity<Map<String, Object>> obterResumoMensal(
             @PathVariable int ano,
@@ -76,7 +76,7 @@ public class ExtratoFinanceiroController {
         return ResponseEntity.ok(resumo);
     }
 
-    // Obter resumo anual
+    // Resumo anual
     @GetMapping("/resumo/ano/{ano}")
     public ResponseEntity<Map<String, Object>> obterResumoAnual(@PathVariable int ano) {
         Map<String, Object> resumo = new HashMap<>();
@@ -93,7 +93,7 @@ public class ExtratoFinanceiroController {
         return ResponseEntity.ok(resumo);
     }
 
-    // Atualizar extrato de um dia específico
+    // Atualiza o extrato de um dia específico
     @PostMapping("/atualizar/{data}")
     public ResponseEntity<ExtratoFinanceiro> atualizarExtratoDia(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
@@ -105,7 +105,7 @@ public class ExtratoFinanceiroController {
         }
     }
 
-    // Regenerar extratos de um período
+    // Regenera extratos de um período
     @PostMapping("/regenerar")
     public ResponseEntity<String> regenerarExtratosPeriodo(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
@@ -118,7 +118,7 @@ public class ExtratoFinanceiroController {
         }
     }
 
-    // Calcular saldo acumulado até uma data
+    // Calcula o saldo acumulado até uma data
     @GetMapping("/saldo-acumulado/{data}")
     public ResponseEntity<Map<String, Object>> calcularSaldoAcumulado(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {

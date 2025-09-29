@@ -55,7 +55,6 @@ public class ExtratoFinanceiro {
         }
     }
 
-    // Constructors
     public ExtratoFinanceiro() {
         this.totalCreditosDolares = BigDecimal.ZERO;
         this.totalDebitosDolares = BigDecimal.ZERO;
@@ -68,7 +67,6 @@ public class ExtratoFinanceiro {
         this.data = data;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

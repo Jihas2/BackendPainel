@@ -73,7 +73,7 @@ public class Transacao {
         }
     }
 
-    // Constructors
+    // Constructors criados para evitar um erro que tinha feito
     public Transacao() {}
 
     public Transacao(LocalDate data, String caracteristica, BigDecimal valorReais,
@@ -88,7 +88,6 @@ public class Transacao {
         this.tipoPagamento = tipoPagamento;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

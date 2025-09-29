@@ -29,7 +29,6 @@ public class CambioHistorico {
         this.dataCriacao = LocalDateTime.now();
     }
 
-    // Constructors
     public CambioHistorico() {}
 
     public CambioHistorico(LocalDate data, BigDecimal taxaUsdBrl) {
@@ -37,7 +36,6 @@ public class CambioHistorico {
         this.taxaUsdBrl = taxaUsdBrl;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

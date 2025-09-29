@@ -22,25 +22,25 @@ public class ExtratoFinanceiroService {
     @Autowired
     private TransacaoRepository transacaoRepository;
 
-    // Atualizar extrato de um dia específico
+    // Atualiza extrato de um dia específico
     public ExtratoFinanceiro atualizarExtratoDia(LocalDate data) {
-        // Buscar ou criar extrato do dia
+        // Busca ou cria extrato do dia
         Optional<ExtratoFinanceiro> extratoExistente = extratoFinanceiroRepository.findByData(data);
         ExtratoFinanceiro extrato = extratoExistente.orElse(new ExtratoFinanceiro(data));
 
-        // Calcular totais do dia
+        // Calcula totais do dia
         BigDecimal totalCreditos = transacaoRepository.calcularTotalCreditosPorData(data);
         BigDecimal totalDebitos = transacaoRepository.calcularTotalDebitosPorData(data);
 
-        // Atualizar valores
+        // Atualiza valores
         extrato.setTotalCreditosDolares(totalCreditos);
         extrato.setTotalDebitosDolares(totalDebitos);
 
-        // Calcular saldo do dia explicitamente
+        // Calcula saldo do dia
         BigDecimal saldoDia = totalCreditos.subtract(totalDebitos);
         extrato.setSaldoDiaDolares(saldoDia);
 
-        // Calcular e definir saldo acumulado
+        // Calcula e define o saldo acumulado
         BigDecimal saldoAcumuladoAnterior = calcularSaldoAcumuladoAteData(data.minusDays(1));
         extrato.setSaldoAcumuladoDolares(saldoAcumuladoAnterior.add(saldoDia));
 
@@ -102,7 +102,7 @@ public class ExtratoFinanceiroService {
         return extratoFinanceiroRepository.calcularSaldoAno(ano);
     }
 
-    // Regenerar extratos de um período (útil para recalcular histórico)
+    // Regenera extratos de um período
     public void regenerarExtratosPeriodo(LocalDate dataInicio, LocalDate dataFim) {
         LocalDate dataAtual = dataInicio;
 

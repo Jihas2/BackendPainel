@@ -17,50 +17,50 @@ public class CambioHistoricoService {
     @Autowired
     private CambioHistoricoRepository cambioHistoricoRepository;
 
-    // Salvar nova taxa de câmbio
+    // Salva nova taxa de cambio
     public CambioHistorico salvarTaxaCambio(LocalDate data, BigDecimal taxa) {
-        // Verificar se já existe taxa para a data
+        // Verifica se já existe taxa para a data
         Optional<CambioHistorico> taxaExistente = cambioHistoricoRepository.findByData(data);
 
         if (taxaExistente.isPresent()) {
-            // Atualizar taxa existente
+            // Atualiza taxa existente
             CambioHistorico cambio = taxaExistente.get();
             cambio.setTaxaUsdBrl(taxa);
             return cambioHistoricoRepository.save(cambio);
         } else {
-            // Criar nova taxa
+            // Cria nova taxa
             CambioHistorico novoCambio = new CambioHistorico(data, taxa);
             return cambioHistoricoRepository.save(novoCambio);
         }
     }
 
-    // Buscar taxa por data específica
+    // Busca taxa por data específica
     @Transactional(readOnly = true)
     public Optional<CambioHistorico> buscarTaxaPorData(LocalDate data) {
         return cambioHistoricoRepository.findByData(data);
     }
 
-    // Buscar taxa mais recente disponível
+    // Busca taxa mais recente disponível
     @Transactional(readOnly = true)
     public Optional<CambioHistorico> buscarUltimaTaxa() {
         List<CambioHistorico> taxas = cambioHistoricoRepository.findUltimaTaxa();
         return taxas.isEmpty() ? Optional.empty() : Optional.of(taxas.get(0));
     }
 
-    // Buscar taxa mais recente até uma data específica
+    // Busca taxa mais recente até uma data específica
     @Transactional(readOnly = true)
     public Optional<CambioHistorico> buscarTaxaMaisRecenteAteData(LocalDate data) {
         List<CambioHistorico> taxas = cambioHistoricoRepository.findTaxaMaisRecenteAteData(data);
         return taxas.isEmpty() ? Optional.empty() : Optional.of(taxas.get(0));
     }
 
-    // Buscar todas as taxas por período
+    // Busca todas as taxas por período
     @Transactional(readOnly = true)
     public List<CambioHistorico> buscarTaxasPorPeriodo(LocalDate dataInicio, LocalDate dataFim) {
         return cambioHistoricoRepository.findByDataBetween(dataInicio, dataFim);
     }
 
-    // Buscar taxas do mês
+    // Busca taxas do mes
     @Transactional(readOnly = true)
     public List<CambioHistorico> buscarTaxasMes(int ano, int mes) {
         return cambioHistoricoRepository.findTaxasPorMes(ano, mes);

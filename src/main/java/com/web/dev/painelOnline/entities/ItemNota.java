@@ -26,9 +26,6 @@ public class ItemNota {
     @Column(name = "valor_total", nullable = false, precision = 15, scale = 2)
     private BigDecimal valorTotal;
 
-    // Permite que o campo seja **lido do JSON de entrada** (WRITE), mas evita que
-    // seja automaticamente serializado na resposta (READ),
-    // ao mesmo tempo não impede o uso JPA.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transacao_id", nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -42,7 +39,6 @@ public class ItemNota {
         }
     }
 
-    // Constructors
     public ItemNota() {}
 
     public ItemNota(String descricao, Integer quantidade, BigDecimal valorUnitario, com.web.dev.painelOnline.entities.Transacao transacao) {
@@ -52,7 +48,6 @@ public class ItemNota {
         this.transacao = transacao;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

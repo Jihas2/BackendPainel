@@ -26,19 +26,19 @@ public class TransacaoService {
     @Autowired
     private ExtratoFinanceiroService extratoFinanceiroService;
 
-    // Criar nova transação simples
+    // Cria nova transação simples
     public Transacao criarTransacao(Transacao transacao) {
         Transacao transacaoSalva = transacaoRepository.save(transacao);
 
-        // Atualizar extrato financeiro do dia
+        // Atualiza o extrato financeiro do dia
         extratoFinanceiroService.atualizarExtratoDia(transacao.getData());
 
         return transacaoSalva;
     }
 
-    // Criar transação com itens (para débitos à prazo)
+    // Cria transação com itens
     public Transacao criarTransacaoComItens(Transacao transacao, List<ItemNota> itens) {
-        // valida itens
+        // valida os itens
         BigDecimal valorTotal = BigDecimal.ZERO;
         for (ItemNota item : itens) {
             if (item.getValorUnitario() == null || item.getQuantidade() == null) {
@@ -50,22 +50,22 @@ public class TransacaoService {
         }
 
         transacao.setValorReais(valorTotal);
-        // salvar transacao antes para ter id
+        // salva transacao antes para ter id
         Transacao transacaoSalva = transacaoRepository.save(transacao);
 
-        // Associar itens à transação e salvar
+        // Associa itens a transação e salva
         for (ItemNota item : itens) {
             item.setTransacao(transacaoSalva);
             itemNotaRepository.save(item);
         }
 
-        // Atualizar extrato financeiro do dia
+        // Atualiza extrato financeiro do dia
         extratoFinanceiroService.atualizarExtratoDia(transacao.getData());
 
         return transacaoSalva;
     }
 
-    // Atualizar transacao
+    // Atualiza transacao
     public Transacao atualizarTransacao(Long id, Transacao transacaoAtualizada) {
         Optional<Transacao> transacaoExistente = transacaoRepository.findById(id);
 
@@ -73,7 +73,7 @@ public class TransacaoService {
             Transacao transacao = transacaoExistente.get();
             LocalDate dataAnterior = transacao.getData();
 
-            // Atualizar campos
+            // Atualiza campos
             transacao.setData(transacaoAtualizada.getData());
             transacao.setCaracteristica(transacaoAtualizada.getCaracteristica());
             transacao.setValorReais(transacaoAtualizada.getValorReais());
@@ -84,7 +84,7 @@ public class TransacaoService {
 
             Transacao transacaoSalva = transacaoRepository.save(transacao);
 
-            // Atualizar extrato da data anterior e nova data
+            // Atualiza o extrato da data anterior e nova data
             extratoFinanceiroService.atualizarExtratoDia(dataAnterior);
             if (!dataAnterior.equals(transacao.getData())) {
                 extratoFinanceiroService.atualizarExtratoDia(transacao.getData());
@@ -103,7 +103,7 @@ public class TransacaoService {
             LocalDate data = transacao.get().getData();
             transacaoRepository.deleteById(id);
 
-            // Atualizar extrato financeiro do dia
+            // Atualiza extrato financeiro do dia
             extratoFinanceiroService.atualizarExtratoDia(data);
         } else {
             throw new RuntimeException("Transação não encontrada com ID: " + id);

@@ -39,16 +39,16 @@ public class ItemNotaService {
             throw new IllegalArgumentException("Transacao não encontrada para id: " + item.getTransacao().getId());
         }
 
-        // associar entidade gerenciada
+        // associa a entidade gerenciada
         Transacao transacao = transacaoOpt.get();
         item.setTransacao(transacao);
 
-        // garantir valorTotal calculado
+        // garante valorTotal calculado
         item.setValorTotal(calcularValorTotalItem(item));
 
         ItemNota salvo = itemNotaRepository.save(item);
 
-        // Atualiza extrato do dia da transacao (assegura que dashboard reflita imediatamente)
+        // Atualiza extrato do dia da transacao
         LocalDate dataTransacao = transacao.getData();
         extratoFinanceiroService.atualizarExtratoDia(dataTransacao);
 
@@ -84,7 +84,7 @@ public class ItemNotaService {
 
         ItemNota atualizado = itemNotaRepository.save(existente);
 
-        // Atualiza extrato(s): data anterior (se diferente) e data atual da transacao
+        // Atualiza extratos
         LocalDate dataTransacaoAtual = atualizado.getTransacao() != null ? atualizado.getTransacao().getData() : null;
 
         if (dataTransacaoAnterior != null) {
@@ -108,7 +108,7 @@ public class ItemNotaService {
 
         itemNotaRepository.deleteById(id);
 
-        // Atualiza extrato do dia da transacao (para refletir remoção do item)
+        // Atualiza extrato do dia da transacao
         if (dataTransacao != null) {
             extratoFinanceiroService.atualizarExtratoDia(dataTransacao);
         }

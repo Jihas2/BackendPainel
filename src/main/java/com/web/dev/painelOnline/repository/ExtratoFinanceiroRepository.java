@@ -13,74 +13,74 @@ import java.util.Optional;
 @Repository
 public interface ExtratoFinanceiroRepository extends JpaRepository<ExtratoFinanceiro, Long> {
 
-    // Buscar extrato por data específica
+    // Busca o extrato por data específica
     Optional<ExtratoFinanceiro> findByData(LocalDate data);
 
-    // Buscar extratos por período
+    // Busca os extratos por período
     List<ExtratoFinanceiro> findByDataBetween(LocalDate dataInicio, LocalDate dataFim);
 
-    // Verificar se existe extrato para uma data
+    // Verifica se existe extrato para uma data
     boolean existsByData(LocalDate data);
 
-    // Buscar extratos do mês
+    // Busca os extratos do mes
     @Query("SELECT e FROM ExtratoFinanceiro e WHERE " +
             "YEAR(e.data) = :ano AND MONTH(e.data) = :mes " +
             "ORDER BY e.data ASC")
     List<ExtratoFinanceiro> findExtratosPorMes(@Param("ano") int ano, @Param("mes") int mes);
 
-    // Buscar extratos do ano
+    // Busca os extratos do ano
     @Query("SELECT e FROM ExtratoFinanceiro e WHERE " +
             "YEAR(e.data) = :ano " +
             "ORDER BY e.data ASC")
     List<ExtratoFinanceiro> findExtratosPorAno(@Param("ano") int ano);
 
-    // Calcular saldo acumulado até uma data
+    // Calcula o saldo acumulado até uma data
     @Query("SELECT COALESCE(SUM(e.saldoDiaDolares), 0) FROM ExtratoFinanceiro e WHERE e.data <= :data")
     BigDecimal calcularSaldoAcumuladoAteData(@Param("data") LocalDate data);
 
-    // Buscar último extrato disponível
+    // Busca o último extrato disponível
     @Query("SELECT e FROM ExtratoFinanceiro e ORDER BY e.data DESC")
     List<ExtratoFinanceiro> findUltimoExtrato();
 
-    // Buscar extrato mais recente até uma data específica
+    // Busca o extrato mais recente até uma data específica
     @Query("SELECT e FROM ExtratoFinanceiro e WHERE e.data <= :data ORDER BY e.data DESC")
     List<ExtratoFinanceiro> findExtratoMaisRecenteAteData(@Param("data") LocalDate data);
 
-    // Calcular total de créditos do mês
+    // Calcula o total de créditos do mes
     @Query("SELECT COALESCE(SUM(e.totalCreditosDolares), 0) FROM ExtratoFinanceiro e WHERE " +
             "YEAR(e.data) = :ano AND MONTH(e.data) = :mes")
     BigDecimal calcularTotalCreditosMes(@Param("ano") int ano, @Param("mes") int mes);
 
-    // Calcular total de débitos do mês
+    // Calcula o total de débitos do mes
     @Query("SELECT COALESCE(SUM(e.totalDebitosDolares), 0) FROM ExtratoFinanceiro e WHERE " +
             "YEAR(e.data) = :ano AND MONTH(e.data) = :mes")
     BigDecimal calcularTotalDebitosMes(@Param("ano") int ano, @Param("mes") int mes);
 
-    // Calcular saldo do mês
+    // Calcula o saldo do mes
     @Query("SELECT COALESCE(SUM(e.saldoDiaDolares), 0) FROM ExtratoFinanceiro e WHERE " +
             "YEAR(e.data) = :ano AND MONTH(e.data) = :mes")
     BigDecimal calcularSaldoMes(@Param("ano") int ano, @Param("mes") int mes);
 
-    // Calcular total de créditos do ano
+    // Calcula o total de créditos do ano
     @Query("SELECT COALESCE(SUM(e.totalCreditosDolares), 0) FROM ExtratoFinanceiro e WHERE " +
             "YEAR(e.data) = :ano")
     BigDecimal calcularTotalCreditosAno(@Param("ano") int ano);
 
-    // Calcular total de débitos do ano
+    // Calcula o total de débitos do ano
     @Query("SELECT COALESCE(SUM(e.totalDebitosDolares), 0) FROM ExtratoFinanceiro e WHERE " +
             "YEAR(e.data) = :ano")
     BigDecimal calcularTotalDebitosAno(@Param("ano") int ano);
 
-    // Calcular saldo do ano
+    // Calcula o saldo do ano
     @Query("SELECT COALESCE(SUM(e.saldoDiaDolares), 0) FROM ExtratoFinanceiro e WHERE " +
             "YEAR(e.data) = :ano")
     BigDecimal calcularSaldoAno(@Param("ano") int ano);
 
-    // Buscar dias com saldo negativo
+    // Busca os dias com saldo negativo
     @Query("SELECT e FROM ExtratoFinanceiro e WHERE e.saldoDiaDolares < 0 ORDER BY e.data DESC")
     List<ExtratoFinanceiro> findDiasComSaldoNegativo();
 
-    // Buscar dias com maior movimento (créditos + débitos)
+    // Busca os dias com maior movimento (créditos + débitos)
     @Query("SELECT e FROM ExtratoFinanceiro e ORDER BY (e.totalCreditosDolares + e.totalDebitosDolares) DESC")
     List<ExtratoFinanceiro> findDiasComMaiorMovimento();
 }

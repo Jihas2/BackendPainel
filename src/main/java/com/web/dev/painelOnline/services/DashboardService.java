@@ -18,20 +18,20 @@ public class DashboardService {
     @Autowired
     private ExtratoFinanceiroService extratoFinanceiroService;
 
-    // Obter dados do dashboard para o mês atual
+    // Mostra os dados do mes atual
     public Map<String, Object> obterDadosDashboard() {
         LocalDate dataAtual = LocalDate.now();
         return obterDadosDashboardMes(dataAtual.getYear(), dataAtual.getMonthValue());
     }
 
-    // Obter dados do dashboard para um mês específico
+    // Mostra dados de um mes em especifico
     public Map<String, Object> obterDadosDashboardMes(int ano, int mes) {
         Map<String, Object> dashboard = new HashMap<>();
 
-        // Total de pagamentos feitos em dólares no mês
+        // Total de pagamentos feitos em dolares no mes
         BigDecimal totalPagamentos = transacaoService.calcularTotalPagamentosMes(ano, mes);
 
-        // Total de débitos à prazo em dólares no mês
+        // Total de débitos à prazo em dólares no mes
         BigDecimal totalDebitosPrazo = transacaoService.calcularTotalDebitosPrazoMes(ano, mes);
 
         // Totais mensais do extrato
@@ -55,7 +55,7 @@ public class DashboardService {
         return dashboard;
     }
 
-    // Obter dados do dashboard para o ano
+    // Mostra os dados do dashboard para o ano
     public Map<String, Object> obterDadosDashboardAno(int ano) {
         Map<String, Object> dashboard = new HashMap<>();
 

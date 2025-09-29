@@ -20,7 +20,7 @@ public class CambioHistoricoController {
     @Autowired
     private CambioHistoricoService cambioHistoricoService;
 
-    // Salvar nova taxa de câmbio
+    // Salva nova taxa de cambio
     @PostMapping
     public ResponseEntity<CambioHistorico> salvarTaxaCambio(@RequestBody CambioHistorico cambio) {
         try {
@@ -34,7 +34,7 @@ public class CambioHistoricoController {
         }
     }
 
-    // Buscar taxa por data específica
+    // Busca a taxa por data específica
     @GetMapping("/data/{data}")
     public ResponseEntity<CambioHistorico> buscarTaxaPorData(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
@@ -43,7 +43,7 @@ public class CambioHistoricoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Buscar última taxa disponível
+    // Busca a última taxa disponível
     @GetMapping("/ultima")
     public ResponseEntity<CambioHistorico> buscarUltimaTaxa() {
         Optional<CambioHistorico> cambio = cambioHistoricoService.buscarUltimaTaxa();
@@ -51,7 +51,7 @@ public class CambioHistoricoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Buscar taxa mais recente até uma data específica
+    // Busca a taxa mais recente até uma data específica
     @GetMapping("/ate-data/{data}")
     public ResponseEntity<CambioHistorico> buscarTaxaMaisRecenteAteData(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
@@ -60,7 +60,7 @@ public class CambioHistoricoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Buscar taxas por período
+    // Busca as taxas por período
     @GetMapping("/periodo")
     public ResponseEntity<List<CambioHistorico>> buscarTaxasPorPeriodo(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
@@ -69,7 +69,7 @@ public class CambioHistoricoController {
         return ResponseEntity.ok(taxas);
     }
 
-    // Buscar taxas do mês
+    // Busca as taxas do mes
     @GetMapping("/mes/{ano}/{mes}")
     public ResponseEntity<List<CambioHistorico>> buscarTaxasMes(
             @PathVariable int ano,
@@ -78,7 +78,7 @@ public class CambioHistoricoController {
         return ResponseEntity.ok(taxas);
     }
 
-    // Excluir taxa
+    // Exclui a taxa
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluirTaxa(@PathVariable Long id) {
         try {

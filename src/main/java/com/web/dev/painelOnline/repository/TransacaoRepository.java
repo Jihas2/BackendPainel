@@ -15,54 +15,53 @@ import java.util.List;
 @Repository
 public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
 
-    // Buscar transações por data
+
     List<Transacao> findByData(LocalDate data);
 
-    // Buscar transações por período
     List<Transacao> findByDataBetween(LocalDate dataInicio, LocalDate dataFim);
 
-    // Buscar transações por tipo
+    // Busca transações por tipo
     List<Transacao> findByTipoTransacao(TipoTransacao tipoTransacao);
 
-    // Buscar transações por status
+    // Busca transações por status
     List<Transacao> findByStatusPagamento(StatusPagamento statusPagamento);
 
-    // Buscar transações por tipo de pagamento
+    // Busca transações por tipo de pagamento
     List<Transacao> findByTipoPagamento(TipoPagamento tipoPagamento);
 
-    // Buscar transações por período e tipo
+    // Busca transações por período e tipo
     List<Transacao> findByDataBetweenAndTipoTransacao(
             LocalDate dataInicio,
             LocalDate dataFim,
             TipoTransacao tipoTransacao
     );
 
-    // Buscar transações por período e status
+    // Busca transações por período e status
     List<Transacao> findByDataBetweenAndStatusPagamento(
             LocalDate dataInicio,
             LocalDate dataFim,
             StatusPagamento statusPagamento
     );
 
-    // Buscar débitos à prazo do mês
+    // Busca débitos à prazo do mes
     @Query("SELECT t FROM Transacao t WHERE " +
             "YEAR(t.data) = :ano AND MONTH(t.data) = :mes AND " +
             "t.tipoTransacao = 'DEBITO' AND t.tipoPagamento = 'A_PRAZO'")
     List<Transacao> findDebitosAPrazoPorMes(@Param("ano") int ano, @Param("mes") int mes);
 
-    // Buscar transações do mês
+    // Busca transações do mes
     @Query("SELECT t FROM Transacao t WHERE " +
             "YEAR(t.data) = :ano AND MONTH(t.data) = :mes " +
             "ORDER BY t.data DESC")
     List<Transacao> findTransacoesPorMes(@Param("ano") int ano, @Param("mes") int mes);
 
-    // Buscar transações do ano
+    // Busca transações do ano
     @Query("SELECT t FROM Transacao t WHERE " +
             "YEAR(t.data) = :ano " +
             "ORDER BY t.data DESC")
     List<Transacao> findTransacoesPorAno(@Param("ano") int ano);
 
-    // Calcular total de créditos em dólares por período
+    // Calcula total de créditos em dólares por período
     @Query("SELECT COALESCE(SUM(t.valorDolares), 0) FROM Transacao t WHERE " +
             "t.data BETWEEN :dataInicio AND :dataFim AND t.tipoTransacao = 'CREDITO'")
     BigDecimal calcularTotalCreditosPorPeriodo(
@@ -70,7 +69,7 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
             @Param("dataFim") LocalDate dataFim
     );
 
-    // Calcular total de débitos em dólares por período
+    // Calcula total de débitos em dólares por período
     @Query("SELECT COALESCE(SUM(t.valorDolares), 0) FROM Transacao t WHERE " +
             "t.data BETWEEN :dataInicio AND :dataFim AND t.tipoTransacao = 'DEBITO'")
     BigDecimal calcularTotalDebitosPorPeriodo(
@@ -78,31 +77,31 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
             @Param("dataFim") LocalDate dataFim
     );
 
-    // Calcular total de créditos em dólares por data específica
+    // Calcula total de créditos em dólares por data específica
     @Query("SELECT COALESCE(SUM(t.valorDolares), 0) FROM Transacao t WHERE " +
             "t.data = :data AND t.tipoTransacao = 'CREDITO'")
     BigDecimal calcularTotalCreditosPorData(@Param("data") LocalDate data);
 
-    // Calcular total de débitos em dólares por data específica
+    // Calcula total de débitos em dólares por data específica
     @Query("SELECT COALESCE(SUM(t.valorDolares), 0) FROM Transacao t WHERE " +
             "t.data = :data AND t.tipoTransacao = 'DEBITO'")
     BigDecimal calcularTotalDebitosPorData(@Param("data") LocalDate data);
 
-    // Buscar transações com itens (para débitos à prazo)
+    // Busca transações com itens
     @Query("SELECT DISTINCT t FROM Transacao t LEFT JOIN FETCH t.itens WHERE t.id = :id")
     Transacao findTransacaoComItens(@Param("id") Long id);
 
-    // Buscar transações por característica (busca parcial)
+    // Busca transações por característica
     @Query("SELECT t FROM Transacao t WHERE LOWER(t.caracteristica) LIKE LOWER(CONCAT('%', :caracteristica, '%'))")
     List<Transacao> findByCaracteristicaContaining(@Param("caracteristica") String caracteristica);
 
-    // Dashboard: Total de pagamentos em dólares do mês
+    // Dashboard: Total de pagamentos em dólares do mes
     @Query("SELECT COALESCE(SUM(t.valorDolares), 0) FROM Transacao t WHERE " +
             "YEAR(t.data) = :ano AND MONTH(t.data) = :mes AND " +
             "t.tipoTransacao = 'CREDITO' AND t.statusPagamento = 'PAGO'")
     BigDecimal calcularTotalPagamentosMes(@Param("ano") int ano, @Param("mes") int mes);
 
-    // Dashboard: Total de débitos à prazo do mês
+    // Dashboard: Total de débitos à prazo do mes
     @Query("SELECT COALESCE(SUM(t.valorDolares), 0) FROM Transacao t WHERE " +
             "YEAR(t.data) = :ano AND MONTH(t.data) = :mes AND " +
             "t.tipoTransacao = 'DEBITO' AND t.tipoPagamento = 'A_PRAZO'")
