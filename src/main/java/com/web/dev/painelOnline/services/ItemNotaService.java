@@ -113,6 +113,11 @@ public class ItemNotaService {
             extratoFinanceiroService.atualizarExtratoDia(dataTransacao);
         }
     }
+    
+    @Transactional(readOnly = true)
+    public List<ItemNota> buscarTodosItens() {
+        return itemNotaRepository.findAll();
+    }
 
     @Transactional(readOnly = true)
     public List<ItemNota> buscarItensPorTransacao(Long transacaoId) {

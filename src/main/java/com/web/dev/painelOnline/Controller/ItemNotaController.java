@@ -22,6 +22,12 @@ public class ItemNotaController {
         List<ItemNota> itens = itemNotaService.buscarItensPorTransacao(transacaoId);
         return ResponseEntity.ok(itens);
     }
+    
+    @GetMapping
+    public ResponseEntity<List<ItemNota>> buscarTodosItens() {
+        List<ItemNota> itens = itemNotaService.buscarTodosItens();
+        return ResponseEntity.ok(itens);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarItemPorId(@PathVariable Long id) {
