@@ -20,7 +20,7 @@ public class CambioHistoricoController {
     @Autowired
     private CambioHistoricoService cambioHistoricoService;
 
-    // Salva nova taxa de cambio
+    // Salva uma nova taxa de cambio
     @PostMapping
     public ResponseEntity<CambioHistorico> salvarTaxaCambio(@RequestBody CambioHistorico cambio) {
         try {
