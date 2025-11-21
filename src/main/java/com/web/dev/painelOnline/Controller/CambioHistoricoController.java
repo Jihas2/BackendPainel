@@ -4,88 +4,88 @@ import com.web.dev.painelOnline.entities.CambioHistorico;
 import com.web.dev.painelOnline.services.CambioHistoricoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/cambio")
-@CrossOrigin(origins = "*")
+@RequestMapping("/cambio")
+@CrossOrigin("*")
 public class CambioHistoricoController {
 
     @Autowired
     private CambioHistoricoService cambioHistoricoService;
 
-    // Salva uma nova taxa de cambio
-    @PostMapping
-    public ResponseEntity<CambioHistorico> salvarTaxaCambio(@RequestBody CambioHistorico cambio) {
-        try {
-            CambioHistorico cambioSalvo = cambioHistoricoService.salvarTaxaCambio(
-                    cambio.getData(),
-                    cambio.getTaxaUsdBrl()
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(cambioSalvo);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+    // Atualiza taxa usando API
+
+    @GetMapping("/atualizar")
+    public BigDecimal atualizarTaxaDoDia() {
+        return cambioHistoricoService.atualizarTaxaCambioDoDia();
     }
 
-    // Busca a taxa por data específica
-    @GetMapping("/data/{data}")
-    public ResponseEntity<CambioHistorico> buscarTaxaPorData(
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
-        Optional<CambioHistorico> cambio = cambioHistoricoService.buscarTaxaPorData(data);
-        return cambio.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    // Buscar taxa do dia
+
+    @GetMapping("/taxa-hoje")
+    public Optional<CambioHistorico> buscarTaxaHoje() {
+        return cambioHistoricoService.buscarTaxaDoDia();
     }
 
-    // Busca a última taxa disponível
+    // Salvar manualmente taxa (NAO SERA MAIS USADO MAS MANTI ELE)
+
+    @PostMapping("/salvar")
+    public CambioHistorico salvarTaxaCambio(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam BigDecimal taxa) {
+
+        return cambioHistoricoService.salvarTaxaCambio(date, taxa);
+    }
+
+    // Buscar por data
+    @GetMapping("/por-data")
+    public Optional<CambioHistorico> buscarTaxaPorData(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        return cambioHistoricoService.buscarTaxaPorData(date);
+    }
+
+    // Última taxa cadastrada
     @GetMapping("/ultima")
-    public ResponseEntity<CambioHistorico> buscarUltimaTaxa() {
-        Optional<CambioHistorico> cambio = cambioHistoricoService.buscarUltimaTaxa();
-        return cambio.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public Optional<CambioHistorico> buscarUltimaTaxa() {
+        return cambioHistoricoService.buscarUltimaTaxa();
     }
 
-    // Busca a taxa mais recente até uma data específica
-    @GetMapping("/ate-data/{data}")
-    public ResponseEntity<CambioHistorico> buscarTaxaMaisRecenteAteData(
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
-        Optional<CambioHistorico> cambio = cambioHistoricoService.buscarTaxaMaisRecenteAteData(data);
-        return cambio.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    // Buscar taxa mais recente até uma data
+    @GetMapping("/ate-data")
+    public Optional<CambioHistorico> buscarTaxaMaisRecenteAteData(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        return cambioHistoricoService.buscarTaxaMaisRecenteAteData(date);
     }
 
-    // Busca as taxas por período
+    // Buscar período
     @GetMapping("/periodo")
-    public ResponseEntity<List<CambioHistorico>> buscarTaxasPorPeriodo(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim) {
-        List<CambioHistorico> taxas = cambioHistoricoService.buscarTaxasPorPeriodo(dataInicio, dataFim);
-        return ResponseEntity.ok(taxas);
+    public List<CambioHistorico> buscarPeriodos(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
+
+        return cambioHistoricoService.buscarTaxasPorPeriodo(inicio, fim);
     }
 
-    // Busca as taxas do mes
-    @GetMapping("/mes/{ano}/{mes}")
-    public ResponseEntity<List<CambioHistorico>> buscarTaxasMes(
-            @PathVariable int ano,
-            @PathVariable int mes) {
-        List<CambioHistorico> taxas = cambioHistoricoService.buscarTaxasMes(ano, mes);
-        return ResponseEntity.ok(taxas);
+    // Buscar taxas do mês
+    @GetMapping("/mes")
+    public List<CambioHistorico> buscarMes(
+            @RequestParam int ano,
+            @RequestParam int mes) {
+
+        return cambioHistoricoService.buscarTaxasMes(ano, mes);
     }
 
-    // Exclui a taxa
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluirTaxa(@PathVariable Long id) {
-        try {
-            cambioHistoricoService.excluirTaxa(id);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+    // Excluir taxa
+    @DeleteMapping("/excluir/{id}")
+    public void excluirTaxa(@PathVariable Long id) {
+        cambioHistoricoService.excluirTaxa(id);
     }
 }
