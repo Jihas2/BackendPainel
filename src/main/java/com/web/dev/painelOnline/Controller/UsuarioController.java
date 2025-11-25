@@ -3,10 +3,15 @@ package com.web.dev.painelOnline.Controller;
 import com.web.dev.painelOnline.entities.Usuario;
 import com.web.dev.painelOnline.Enum.TipoUsuario;
 import com.web.dev.painelOnline.services.UsuarioService;
+import com.web.dev.painelOnline.services.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.*;
 
 @RestController
@@ -16,6 +21,12 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @PostMapping("/cadastrar")
     public ResponseEntity<Map<String, Object>> cadastrarUsuario(@RequestBody Usuario usuario) {
@@ -47,14 +58,26 @@ public class UsuarioController {
             }
 
             Usuario usuario = usuarioService.login(email, senha);
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+            String token = jwtUtils.generateToken(
+                    userDetails,
+                    usuario.getId(),
+                    usuario.getTipoUsuario().name()
+            );
+
             Map<String, Object> response = criarResponseUsuario(usuario);
+            response.put("token", token);
             response.put("mensagem", "Login realizado com sucesso");
 
             return new ResponseEntity<>(response, HttpStatus.OK);
+
         } catch (IllegalArgumentException e) {
             Map<String, Object> erro = new HashMap<>();
             erro.put("erro", e.getMessage());
             return new ResponseEntity<>(erro, HttpStatus.UNAUTHORIZED);
+
         } catch (Exception e) {
             Map<String, Object> erro = new HashMap<>();
             erro.put("erro", "Erro ao realizar login: " + e.getMessage());
@@ -63,26 +86,29 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> listarUsuarios(
-            @RequestHeader("X-Usuario-Tipo") String tipoUsuario) {
+    public ResponseEntity<?> listarUsuarios(@RequestHeader("X-Usuario-Tipo") String tipoUsuario) {
         try {
             TipoUsuario tipo = TipoUsuario.valueOf(tipoUsuario);
             List<Usuario> usuarios = usuarioService.buscarTodosUsuarios(tipo);
 
             List<Map<String, Object>> response = new ArrayList<>();
+
             for (Usuario usuario : usuarios) {
                 response.add(criarResponseUsuario(usuario));
             }
 
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return ResponseEntity.ok(response);
+
         } catch (IllegalArgumentException e) {
-            Map<String, Object> erro = new HashMap<>();
-            erro.put("erro", e.getMessage());
-            return new ResponseEntity<>(erro, HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Collections.singletonMap("erro", e.getMessage()));
+
         } catch (Exception e) {
-            Map<String, Object> erro = new HashMap<>();
-            erro.put("erro", "Erro ao listar usuários: " + e.getMessage());
-            return new ResponseEntity<>(erro, HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap(
+                            "erro",
+                            "Erro ao listar usuários: " + e.getMessage()
+                    ));
         }
     }
 

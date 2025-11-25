@@ -28,7 +28,7 @@ public class CambioHistoricoService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    //  Atualiza taxa USD → BRL usando API
+    //  Atualiza taxa USD para BRL usando API
 
     public BigDecimal atualizarTaxaCambioDoDia() {
         try {

@@ -3,9 +3,9 @@ package com.web.dev.painelOnline.services;
 import com.web.dev.painelOnline.entities.Usuario;
 import com.web.dev.painelOnline.Enum.TipoUsuario;
 import com.web.dev.painelOnline.repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,10 +13,15 @@ import java.util.Optional;
 @Transactional
 public class UsuarioService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    // Cadastra novo usuário
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    // Cadastra novo usuário com uma senha criptografada
     public Usuario cadastrarUsuario(Usuario usuario) {
         validarDadosUsuario(usuario);
 
@@ -28,10 +33,13 @@ public class UsuarioService {
             usuario.setTipoUsuario(TipoUsuario.USUARIO);
         }
 
+        // criptografa senha antes de salvar
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+
         return usuarioRepository.save(usuario);
     }
 
-    // Login do usuário
+    // Login do usuário com verificação por PasswordEncoder
     @Transactional(readOnly = true)
     public Usuario login(String email, String senha) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
@@ -46,15 +54,13 @@ public class UsuarioService {
             throw new IllegalArgumentException("Usuário inativo");
         }
 
-        // Usar passwordEncoder.matches() quando implementar JWT
-        if (!usuario.getSenha().equals(senha)) {
+        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
             throw new IllegalArgumentException("Email ou senha inválidos");
         }
 
         return usuario;
     }
 
-    // Atualiza dados do usuário
     public Usuario atualizarUsuario(Long id, Usuario usuarioAtualizado, Long idUsuarioLogado, TipoUsuario tipoUsuarioLogado) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
 
@@ -64,12 +70,10 @@ public class UsuarioService {
 
         Usuario usuario = usuarioOpt.get();
 
-        // Verifica permissões
         if (tipoUsuarioLogado != TipoUsuario.DEMANDANTE && !idUsuarioLogado.equals(id)) {
             throw new IllegalArgumentException("Você não tem permissão para editar este usuário");
         }
 
-        // Atualiza campos permitidos
         if (usuarioAtualizado.getNome() != null) {
             usuario.setNome(usuarioAtualizado.getNome());
         }
@@ -82,11 +86,9 @@ public class UsuarioService {
         }
 
         if (usuarioAtualizado.getSenha() != null && !usuarioAtualizado.getSenha().isEmpty()) {
-            // Encriptar senha quando implementar JWT
-            usuario.setSenha(usuarioAtualizado.getSenha());
+            usuario.setSenha(passwordEncoder.encode(usuarioAtualizado.getSenha()));
         }
 
-        // Apenas DEMANDANTE pode alterar tipo de usuário
         if (tipoUsuarioLogado == TipoUsuario.DEMANDANTE && usuarioAtualizado.getTipoUsuario() != null) {
             usuario.setTipoUsuario(usuarioAtualizado.getTipoUsuario());
         }
@@ -94,7 +96,6 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    // Exclui usuário (apenas DEMANDANTE)
     public void excluirUsuario(Long id, TipoUsuario tipoUsuarioLogado) {
         if (tipoUsuarioLogado != TipoUsuario.DEMANDANTE) {
             throw new IllegalArgumentException("Apenas demandantes podem excluir usuários");
@@ -107,7 +108,6 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    // Desativa usuário (apenas DEMANDANTE)
     public Usuario desativarUsuario(Long id, TipoUsuario tipoUsuarioLogado) {
         if (tipoUsuarioLogado != TipoUsuario.DEMANDANTE) {
             throw new IllegalArgumentException("Apenas demandantes podem desativar usuários");
@@ -123,7 +123,6 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    // Reativa usuário (apenas DEMANDANTE)
     public Usuario reativarUsuario(Long id, TipoUsuario tipoUsuarioLogado) {
         if (tipoUsuarioLogado != TipoUsuario.DEMANDANTE) {
             throw new IllegalArgumentException("Apenas demandantes podem reativar usuários");
@@ -139,7 +138,6 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    // Busca todos os usuários (apenas DEMANDANTE)
     @Transactional(readOnly = true)
     public List<Usuario> buscarTodosUsuarios(TipoUsuario tipoUsuarioLogado) {
         if (tipoUsuarioLogado != TipoUsuario.DEMANDANTE) {
@@ -148,7 +146,6 @@ public class UsuarioService {
         return usuarioRepository.findAll();
     }
 
-    // Busca usuário por ID
     @Transactional(readOnly = true)
     public Optional<Usuario> buscarUsuarioPorId(Long id, Long idUsuarioLogado, TipoUsuario tipoUsuarioLogado) {
         if (tipoUsuarioLogado != TipoUsuario.DEMANDANTE && !idUsuarioLogado.equals(id)) {
@@ -157,13 +154,11 @@ public class UsuarioService {
         return usuarioRepository.findById(id);
     }
 
-    // Busca usuário por email
     @Transactional(readOnly = true)
     public Optional<Usuario> buscarUsuarioPorEmail(String email) {
         return usuarioRepository.findByEmail(email);
     }
 
-    // Validações
     private void validarDadosUsuario(Usuario usuario) {
         if (usuario.getNome() == null || usuario.getNome().trim().isEmpty()) {
             throw new IllegalArgumentException("Nome é obrigatório");
