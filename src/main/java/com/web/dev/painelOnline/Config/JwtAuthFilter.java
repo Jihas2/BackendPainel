@@ -1,4 +1,4 @@
-package com.web.dev.painelOnline.security;
+package com.web.dev.painelOnline.Config;
 
 import com.web.dev.painelOnline.services.JwtUtils;
 import jakarta.servlet.FilterChain;
