@@ -1,5 +1,6 @@
 package com.web.dev.painelOnline.Controller;
 
+import com.web.dev.painelOnline.dto.ItemNotaDTO;
 import com.web.dev.painelOnline.entities.ItemNota;
 import com.web.dev.painelOnline.services.ItemNotaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/itens-nota")
@@ -18,15 +20,35 @@ public class ItemNotaController {
     private ItemNotaService itemNotaService;
 
     @GetMapping("/transacao/{transacaoId}")
-    public ResponseEntity<List<ItemNota>> buscarItensPorTransacao(@PathVariable Long transacaoId) {
+    public ResponseEntity<List<ItemNotaDTO>> buscarItensPorTransacao(@PathVariable Long transacaoId) {
         List<ItemNota> itens = itemNotaService.buscarItensPorTransacao(transacaoId);
-        return ResponseEntity.ok(itens);
+        List<ItemNotaDTO> dtos = itens.stream()
+                .map(item -> new ItemNotaDTO(
+                        item.getId(),
+                        item.getDescricao(),
+                        item.getQuantidade(),
+                        item.getValorUnitario(),
+                        item.getValorTotal(),
+                        item.getTransacao() != null ? item.getTransacao().getId() : null
+                ))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
-    
+
     @GetMapping
-    public ResponseEntity<List<ItemNota>> buscarTodosItens() {
+    public ResponseEntity<List<ItemNotaDTO>> buscarTodosItens() {
         List<ItemNota> itens = itemNotaService.buscarTodosItens();
-        return ResponseEntity.ok(itens);
+        List<ItemNotaDTO> dtos = itens.stream()
+                .map(item -> new ItemNotaDTO(
+                        item.getId(),
+                        item.getDescricao(),
+                        item.getQuantidade(),
+                        item.getValorUnitario(),
+                        item.getValorTotal(),
+                        item.getTransacao() != null ? item.getTransacao().getId() : null
+                ))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
@@ -98,8 +120,18 @@ public class ItemNotaController {
     }
 
     @GetMapping("/buscar")
-    public ResponseEntity<List<ItemNota>> buscarItensPorDescricao(@RequestParam String descricao) {
+    public ResponseEntity<List<ItemNotaDTO>> buscarItensPorDescricao(@RequestParam String descricao) {
         List<ItemNota> itens = itemNotaService.buscarPorDescricao(descricao);
-        return ResponseEntity.ok(itens);
+        List<ItemNotaDTO> dtos = itens.stream()
+                .map(item -> new ItemNotaDTO(
+                        item.getId(),
+                        item.getDescricao(),
+                        item.getQuantidade(),
+                        item.getValorUnitario(),
+                        item.getValorTotal(),
+                        item.getTransacao() != null ? item.getTransacao().getId() : null
+                ))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 }

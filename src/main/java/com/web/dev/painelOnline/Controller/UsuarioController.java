@@ -31,14 +31,45 @@ public class UsuarioController {
     @PostMapping("/cadastrar")
     public ResponseEntity<Map<String, Object>> cadastrarUsuario(@RequestBody Usuario usuario) {
         try {
+
+            System.out.println("=== CADASTRO DE USUÁRIO ===");
+            System.out.println("Nome: " + usuario.getNome());
+            System.out.println("Email: " + usuario.getEmail());
+            System.out.println("Tipo: " + usuario.getTipoUsuario());
+            System.out.println("Senha presente: " + (usuario.getSenha() != null && !usuario.getSenha().isEmpty()));
+
+            // Validações básicas
+            if (usuario.getNome() == null || usuario.getNome().trim().isEmpty()) {
+                throw new IllegalArgumentException("Nome é obrigatório");
+            }
+
+            if (usuario.getEmail() == null || usuario.getEmail().trim().isEmpty()) {
+                throw new IllegalArgumentException("Email é obrigatório");
+            }
+
+            if (usuario.getSenha() == null || usuario.getSenha().length() < 5) {
+                throw new IllegalArgumentException("Senha deve ter no mínimo 5 caracteres");
+            }
+
+            if (usuario.getTipoUsuario() == null) {
+                throw new IllegalArgumentException("Tipo de usuário é obrigatório");
+            }
+
             Usuario novoUsuario = usuarioService.cadastrarUsuario(usuario);
             Map<String, Object> response = criarResponseUsuario(novoUsuario);
+            response.put("mensagem", "Usuário cadastrado com sucesso");
+
+            System.out.println("Usuário cadastrado com sucesso! ID: " + novoUsuario.getId());
+
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
+            System.err.println("Erro de validação: " + e.getMessage());
             Map<String, Object> erro = new HashMap<>();
             erro.put("erro", e.getMessage());
             return new ResponseEntity<>(erro, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
+            System.err.println("Erro ao cadastrar usuário: " + e.getMessage());
+            e.printStackTrace();
             Map<String, Object> erro = new HashMap<>();
             erro.put("erro", "Erro ao cadastrar usuário: " + e.getMessage());
             return new ResponseEntity<>(erro, HttpStatus.INTERNAL_SERVER_ERROR);

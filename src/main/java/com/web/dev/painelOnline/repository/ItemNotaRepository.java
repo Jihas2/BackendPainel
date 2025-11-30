@@ -12,6 +12,10 @@ import java.util.List;
 @Repository
 public interface ItemNotaRepository extends JpaRepository<ItemNota, Long> {
 
+    // Busca todos os itens com transação carregada
+    @Query("SELECT i FROM ItemNota i LEFT JOIN FETCH i.transacao")
+    List<ItemNota> findAllWithTransacao();
+
     // Busca itens por transação
     List<ItemNota> findByTransacao(Transacao transacao);
 
