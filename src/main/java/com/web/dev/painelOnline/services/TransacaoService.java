@@ -149,4 +149,9 @@ public class TransacaoService {
     public BigDecimal calcularTotalDebitosPrazoMes(int ano, int mes) {
         return transacaoRepository.calcularTotalDebitosPrazoMes(ano, mes);
     }
+
+    @Transactional(readOnly = true)
+    public List<Transacao> buscarPorCaracteristica(String caracteristica) {
+        return transacaoRepository.findByCaracteristicaContaining(caracteristica);
+    }
 }

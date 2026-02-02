@@ -124,6 +124,17 @@ public class TransacaoController {
         }
     }
 
+    // BUSCA POR CARACTERÍSTICA (DESCRIÇÃO)
+    @GetMapping("/buscar")
+    public ResponseEntity<List<Transacao>> buscarPorCaracteristica(
+            @RequestParam String caracteristica) {
+
+        List<Transacao> transacoes =
+                transacaoService.buscarPorCaracteristica(caracteristica);
+
+        return ResponseEntity.ok(transacoes);
+    }
+
     // Exclui a  transação
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluirTransacao(@PathVariable Long id) {
