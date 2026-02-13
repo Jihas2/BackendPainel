@@ -124,6 +124,26 @@ public class TransacaoController {
         }
     }
 
+    // Atualiza a quantidade de itens de uma transação
+    @PutMapping("/{id}/atualizar-quantidade-itens")
+    public ResponseEntity<Transacao> atualizarQuantidadeItens(
+            @PathVariable Long id,
+            @RequestBody Map<String, Integer> request) {
+        try {
+            Integer novaQuantidade = request.get("quantidade");
+            if (novaQuantidade == null || novaQuantidade < 0) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Transacao transacaoAtualizada = transacaoService.atualizarQuantidadeItens(id, novaQuantidade);
+            return ResponseEntity.ok(transacaoAtualizada);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
     // BUSCA POR CARACTERÍSTICA (DESCRIÇÃO)
     @GetMapping("/buscar")
     public ResponseEntity<List<Transacao>> buscarPorCaracteristica(

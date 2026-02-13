@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -94,6 +95,48 @@ public class TransacaoService {
         }
 
         throw new RuntimeException("Transação não encontrada com ID: " + id);
+    }
+
+    // Atualiza a quantidade de itens de uma transação
+    public Transacao atualizarQuantidadeItens(Long id, Integer novaQuantidade) {
+        Optional<Transacao> transacaoExistente = transacaoRepository.findById(id);
+
+        if (!transacaoExistente.isPresent()) {
+            throw new RuntimeException("Transação não encontrada com ID: " + id);
+        }
+
+        Transacao transacao = transacaoExistente.get();
+
+        // Busca todos os itens atuais da transação
+        List<ItemNota> itensAtuais = itemNotaRepository.findByTransacaoId(id);
+        int quantidadeAtual = itensAtuais.size();
+
+        if (novaQuantidade > quantidadeAtual) {
+            // Adiciona novos itens vazios
+            int quantidadeParaAdicionar = novaQuantidade - quantidadeAtual;
+            for (int i = 0; i < quantidadeParaAdicionar; i++) {
+                ItemNota novoItem = new ItemNota();
+                novoItem.setTransacao(transacao);
+                novoItem.setDescricao("Item " + (quantidadeAtual + i + 1));
+                novoItem.setQuantidade(0);
+                novoItem.setValorUnitario(BigDecimal.ZERO);
+                novoItem.setValorTotal(BigDecimal.ZERO);
+                itemNotaRepository.save(novoItem);
+            }
+        } else if (novaQuantidade < quantidadeAtual) {
+            // Remove itens os últimos adicionados
+            int quantidadeParaRemover = quantidadeAtual - novaQuantidade;
+            List<ItemNota> itensParaRemover = itensAtuais.subList(
+                    itensAtuais.size() - quantidadeParaRemover,
+                    itensAtuais.size()
+            );
+            for (ItemNota item : itensParaRemover) {
+                itemNotaRepository.delete(item);
+            }
+        }
+
+        // Retorna a transação atualizada com os itens
+        return transacaoRepository.findTransacaoComItens(id);
     }
 
     public void excluirTransacao(Long id) {
