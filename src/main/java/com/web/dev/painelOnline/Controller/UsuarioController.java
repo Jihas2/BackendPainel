@@ -7,7 +7,7 @@ import com.web.dev.painelOnline.services.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +38,6 @@ public class UsuarioController {
             System.out.println("Tipo: " + usuario.getTipoUsuario());
             System.out.println("Senha presente: " + (usuario.getSenha() != null && !usuario.getSenha().isEmpty()));
 
-            // Validações básicas
             if (usuario.getNome() == null || usuario.getNome().trim().isEmpty()) {
                 throw new IllegalArgumentException("Nome é obrigatório");
             }
@@ -63,13 +62,10 @@ public class UsuarioController {
 
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
-            System.err.println("Erro de validação: " + e.getMessage());
             Map<String, Object> erro = new HashMap<>();
             erro.put("erro", e.getMessage());
             return new ResponseEntity<>(erro, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            System.err.println("Erro ao cadastrar usuário: " + e.getMessage());
-            e.printStackTrace();
             Map<String, Object> erro = new HashMap<>();
             erro.put("erro", "Erro ao cadastrar usuário: " + e.getMessage());
             return new ResponseEntity<>(erro, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -169,6 +165,7 @@ public class UsuarioController {
         }
     }
 
+    @PreAuthorize("hasRole('DEMANDANTE')")
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> atualizarUsuario(
             @PathVariable Long id,
@@ -198,6 +195,7 @@ public class UsuarioController {
         }
     }
 
+    @PreAuthorize("hasRole('DEMANDANTE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> excluirUsuario(
             @PathVariable Long id,
@@ -224,6 +222,7 @@ public class UsuarioController {
         }
     }
 
+    @PreAuthorize("hasRole('DEMANDANTE')")
     @PatchMapping("/{id}/desativar")
     public ResponseEntity<Map<String, Object>> desativarUsuario(
             @PathVariable Long id,
@@ -251,6 +250,7 @@ public class UsuarioController {
         }
     }
 
+    @PreAuthorize("hasRole('DEMANDANTE')")
     @PatchMapping("/{id}/reativar")
     public ResponseEntity<Map<String, Object>> reativarUsuario(
             @PathVariable Long id,
