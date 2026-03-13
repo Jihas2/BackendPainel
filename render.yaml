@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: backend-painel-techpro
+    runtime: docker
+    repo: https://github.com/Jihas2/BackendPainel
+    branch: main
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:mysql://mysql-painel.railway.app:3306/Painel
+      - key: SPRING_DATASOURCE_USERNAME
+        value: root
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: root
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: SERVER_PORT
+        value: 8080
+      - key: CAMBIO_API_URL
+        value: https://economia.awesomeapi.com.br/json/last/USD-BRL
