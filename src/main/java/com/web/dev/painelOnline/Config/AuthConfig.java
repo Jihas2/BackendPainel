@@ -31,6 +31,8 @@ public class AuthConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
+        System.out.println(">>> AuthConfig carregado - /cambio/** está permitAll");
+
         return http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> {})
