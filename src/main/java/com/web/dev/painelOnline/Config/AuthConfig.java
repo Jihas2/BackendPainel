@@ -33,19 +33,15 @@ public class AuthConfig {
 
         return http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {}) // ativa suporte a CORS do Spring Security
+                .cors(cors -> {})
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // libera preflight (OPTIONS)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // rotas públicas
                         .requestMatchers(
                                 "/api/usuarios/login",
-                                "/api/usuarios/cadastrar"
+                                "/api/usuarios/cadastrar",
+                                "/cambio/**"
                         ).permitAll()
-
-                        // resto precisa autenticação
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider)
