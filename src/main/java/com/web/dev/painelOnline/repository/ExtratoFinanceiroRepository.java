@@ -34,8 +34,15 @@ public interface ExtratoFinanceiroRepository extends JpaRepository<ExtratoFinanc
             "ORDER BY e.data ASC")
     List<ExtratoFinanceiro> findExtratosPorAno(@Param("ano") int ano);
 
-    // Calcula o saldo acumulado até uma data
-    @Query("SELECT COALESCE(SUM(e.saldoDiaDolares), 0) FROM ExtratoFinanceiro e WHERE e.data <= :data")
+    // ── CORRIGIDO ─────────────────────────────────────────
+    // Busca o saldoAcumuladoDolares da última entrada disponível até a data.
+    // O campo saldoAcumuladoDolares já é um total cumulativo (calculado em
+    // atualizarExtratoDia), portanto basta pegar o valor do registro mais
+    // recente — somar saldoDiaDolares era errado quando havia dias sem entrada.
+    @Query("SELECT COALESCE(e.saldoAcumuladoDolares, 0) FROM ExtratoFinanceiro e " +
+            "WHERE e.data = (" +
+            "  SELECT MAX(e2.data) FROM ExtratoFinanceiro e2 WHERE e2.data <= :data" +
+            ")")
     BigDecimal calcularSaldoAcumuladoAteData(@Param("data") LocalDate data);
 
     // Busca o último extrato disponível
