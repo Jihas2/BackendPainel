@@ -28,31 +28,39 @@ public class CambioHistoricoService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    //  Atualiza taxa USD para BRL usando API
-
+    // Atualiza taxa USD para BRL usando API
     public BigDecimal atualizarTaxaCambioDoDia() {
         try {
-            // Chamada da API
             String response = restTemplate.getForObject(apiUrl, String.class);
-
             JsonNode json = objectMapper.readTree(response);
             JsonNode usdBrl = json.get("USDBRL");
-
             BigDecimal taxa = new BigDecimal(usdBrl.get("bid").asText());
             LocalDate hoje = LocalDate.now();
-
-            // Salva ou atualiza no histórico
             salvarTaxaCambio(hoje, taxa);
-
             return taxa;
 
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao atualizar taxa de câmbio via API: " + e.getMessage());
+            // Se falhar (limite excedido, sem conexão, etc), busca última taxa do banco
+            System.out.println("API de câmbio indisponível, usando última taxa do banco: " + e.getMessage());
+
+            // Tenta taxa de hoje primeiro
+            Optional<CambioHistorico> taxaHoje = cambioHistoricoRepository.findByData(LocalDate.now());
+            if (taxaHoje.isPresent()) {
+                return taxaHoje.get().getTaxaUsdBrl();
+            }
+
+            // Se não tiver hoje, pega a mais recente
+            List<CambioHistorico> ultimas = cambioHistoricoRepository.findUltimaTaxa();
+            if (!ultimas.isEmpty()) {
+                return ultimas.get(0).getTaxaUsdBrl();
+            }
+
+            // Último recurso: valor padrão
+            return new BigDecimal("5.80");
         }
     }
 
     // Retorna taxa do dia (se existir no banco)
-
     public Optional<CambioHistorico> buscarTaxaDoDia() {
         return buscarTaxaPorData(LocalDate.now());
     }
